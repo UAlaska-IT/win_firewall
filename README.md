@@ -134,6 +134,16 @@ This resource has a two attributes.
 * `name` - The `name_property` of the resource.  Maps to the group field of rules within the firewall.
 * `firewall_name` - Defaults to `'default'`.  The name of the associated firewall.  In the absence of a compelling reason, almost all users should use a single firewall within a cookbook.
 
+## Attributes
+All `firewall` actions and those `firewall_rule_state` actions that use regular expression matching will respect one or more whitelists.
+
+* `node['win_firewall']['firewall_to_whitelist_groups']` - Defaults to `{'default' => ['core networking']}`; the default firewall will whitelist the 'Core Networking' group.  Pre-existing rules that belong to these groups will not be disabled or deleted by actions on the named firewall.
+* `node['win_firewall']['firewall_to_whitelist_rules']` - Defaults to `{'default' => []}`; the default firewall has no whitelisted rules.  Pre-existing rules with name listed here will not be disabled or deleted by actions on the named firewall.
+
+## Recipes
+
+This is a resource-only cookbook; and adding the default recipe to a node's runlist will have no effect.
+
 ## Examples
 
 ```ruby
