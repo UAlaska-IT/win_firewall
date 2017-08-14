@@ -325,7 +325,7 @@ module Firewall
       return false if firewall_rule_exists?(rule.name)
 
       Chef::Log.debug("Creating firewall rule '#{rule.name}'")
-      converge_by "Create Firewall Rule #{rule.name}" do
+      converge_by "Create Firewall Rule #{rule.name}" do # ~FC005 # Repetition of declarations??
         create_firewall_rule(rule)
       end
       return true
