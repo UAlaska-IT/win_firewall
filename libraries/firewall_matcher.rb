@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 if defined?(ChefSpec)
-  ChefSpec::Runner.define_runner_method(:firewall)
+  ChefSpec.define_matcher(:firewall)
 
   def create_firewall(resource)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall, :create, resource)
@@ -23,13 +23,13 @@ if defined?(ChefSpec)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall, :delete_external_disabled_rules, resource)
   end
 
-  ChefSpec::Runner.define_runner_method(:firewall_rule)
+  ChefSpec.define_matcher(:firewall_rule)
 
   def create_synchronize_firewall_rule(resource)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall_rule, :create_synchronize, resource)
   end
 
-  ChefSpec::Runner.define_runner_method(:firewall_rule_group)
+  ChefSpec.define_matcher(:firewall_rule_group)
 
   def enable_firewall_rule_group(resource)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall_rule_state, :enable, resource)
@@ -43,7 +43,7 @@ if defined?(ChefSpec)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall_rule_state, :delete, resource)
   end
 
-  ChefSpec::Runner.define_runner_method(:firewall_rule_state)
+  ChefSpec.define_matcher(:firewall_rule_state)
 
   def enable_firewall_rule_state(resource)
     ChefSpec::Matchers::ResourceMatcher.new(:firewall_rule_state, :enable, resource)
