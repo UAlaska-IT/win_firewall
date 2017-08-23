@@ -105,11 +105,12 @@ There are two modes for how the rule name is used
 When regex matching is used, all actions will skip managed rules and respect the rule whitelist of the associated firewall, but not the group whitelist.
 
 __Actions__
-Three actions are provided.
+Three actions are provided.  If exact name matching is used, all actions except `delete` enforce the precondition that the named rule exists and will throw an exception otherwise.
 
-* `enable` - Post condition is that the named rule is enabled.  If exact name matching is used, enforces the precondition that the named rule exists and will throw an exception otherwise.
-* `disable` - Post condition is that the named rule is disabled.  If exact name matching is used, enforces the precondition that the named rule exists and will throw an exception otherwise.
+* `enable` - Post condition is that the named rule is enabled.
+* `disable` - Post condition is that the named rule is disabled.
 * `delete` - Post condition is that the named rule does not exist.
+* `set_remote_ips` - Post condition is that the named rule permits remote IPs corresponding to the `ip_list` attribute.
 
 __Attributes__
 This resource has three attributes.
@@ -117,6 +118,7 @@ This resource has three attributes.
 * `name` - The `name_property` of the resource that maps to either the name of an existing firewall rule or a regular expression that is used for matching rule names.
 * `use_regex` - Defaults to 'false'.  Boolean flag that determines the matching mode.
 * `firewall_name` - Defaults to `'default'`.  The name of the associated firewall.  In the absence of a compelling reason, almost all users should use a single firewall within a cookbook.
+* `ip_list` - Defaults to empty array.  The permitted IPs to be assigned to the rule, represented as an array of CIDRs.  This attribute is used only by the `set_remote_ips` action.
 
 ### firewall_rule_group
 This resource manages an entire rule group with a single action.  See the `firewall_rule_whitelist` resource for details on creating whitelists to mask group actions.
@@ -147,15 +149,14 @@ This is a resource-only cookbook; and adding the default recipe to a node's runl
 ## Examples
 
 ```ruby
-firewall_rule 'Inbound Dynamic Host Configuration Protocol (DHCP)' do
-  description 'Allow inbound Inbound Dynamic Host Configuration Protocol (DHCP) from only UA address space'
+firewall_rule 'Inbound Windows Remote Desktop Protocol (RDP) over TCP' do
+  description 'Allow inbound Windows Remote Desktop Protocol (RDP) over TCP from only UA address space'
   direction 'in'
   remote_ips ['137.229.0.0/16', '199.165.64.0/18', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
-  local_ports [68]
-  remote_ports [67]
-  protocol 'udp'
+  local_ports [3389]
+  protocol 'tcp'
   program 'C:\Windows\system32\svchost.exe'
-  service 'dhcp'
+  service 'termservice'
   firewall_action 'allow'
 end
 
@@ -168,6 +169,12 @@ end
     action :delete
     use_regex true
   end
+end
+
+firewall_rule_state 'dhcp' do
+  action :set_remote_ips
+  use_regex true
+  ip_list ['137.229.0.0/16', '199.165.64.0/18', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']
 end
 
 firewall 'default' do
