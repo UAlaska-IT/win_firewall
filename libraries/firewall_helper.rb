@@ -235,20 +235,20 @@ module Firewall
       log_powershell_out('deletion', script_code)
     end
 
-    def log_system_rule_error?(existing_rule, rule)
+    def log_system_rule_error?(existing_rule, new_rule)
       if !existing_rule['grouping'].nil? && !existing_rule['grouping'].empty?
-        message = "Firewall rule '#{rule.name}' is part of system group '#{existing_rule['grouping']}'"\
-          ' and cannot be managed.  Disable this rule and create the desired rule instead.'
+        message = "Firewall rule '#{new_rule['name']}' is part of system group '#{existing_rule['grouping']}'"\
+          ' and cannot be managed.  Delete this rule and create the desired rule instead.'
         Chef::Log.error(message)
         return true
       end
       return false
     end
 
-    def log_group_policy_error?(existing_rule, rule)
+    def log_group_policy_error?(existing_rule, new_rule)
       if !existing_rule['rule source'].nil? && existing_rule['rule source'] != 'local setting'
-        message = "Firewall rule '#{rule.name}' is set by group policy '#{existing_rule['rule source']}'"\
-          ' and cannot be managed.  Disable this rule and create the desired rule instead.'
+        message = "Firewall rule '#{new_rule['name']}' is set by group policy '#{existing_rule['rule source']}'"\
+          ' and cannot be managed.  Delete this rule and create the desired rule instead.'
         Chef::Log.error(message)
         return true
       end
@@ -257,10 +257,10 @@ module Firewall
 
     # Determine if an existing rule is manageable
     # Log an error if an attempt is made to modify a built-in rule or a rule set by group policy
-    def check_and_log_managed_rule?(rule)
+    def check_and_log_managed_rule?(new_rule)
       existing_rule = parse_firewall_rule(rule.name)
-      return true if log_system_rule_error?(existing_rule, rule)
-      return true if log_group_policy_error?(existing_rule, rule)
+      return true if log_system_rule_error?(existing_rule, new_rule)
+      return true if log_group_policy_error?(existing_rule, new_rule)
       return false
     end
 
@@ -339,7 +339,7 @@ module Firewall
     def update_extant_rule?(rule)
       rule_hash = rule2hash(rule)
       rule_diff = get_rule_diff(rule_hash)
-      return false if rule_diff.empty? || check_and_log_managed_rule?(rule)
+      return false if rule_diff.empty? || check_and_log_managed_rule?(rule_hash)
 
       # Rules are immutable: if we attempt to update an existing rule, we end up with two rules with the same name
       converge_by "Update Firewall Rule #{rule.name}" do
