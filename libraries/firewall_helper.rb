@@ -215,7 +215,7 @@ module Firewall
 
     def validate_creation_output(output)
       return if output.match?(/^Ok./)
-      Chef::Log.error("Error creating firewall rule:\r\n#{cmd.stdout}")
+      Chef::Log.error("Error creating firewall rule:\r\n#{output}")
       raise 'Error creating firewall rule'
     end
 
@@ -398,6 +398,24 @@ module Firewall
       else
         Chef::Log.debug("Skipped deleting rule '#{rule_name}'")
       end
+    end
+
+    def modify_parsed_rule(rule_hash)
+      rule_hash.delete('grouping')
+      rule_hash.delete('rule source')
+      Chef::Log.debug("Rule hash with new IPs: #{rule_hash}")
+    end
+
+    def verify_rule_ips_match(rule_name, firewall_name, remote_ips)
+      Chef::Log.debug("Verifying rule IPs for rule #{rule_name}")
+      unless firewall_rule_exists?(rule_name)
+        raise "Firewall rule '#{rule_name}' does not exist so cannot have remote IPs changed"
+      end
+      rule_hash = parse_firewall_rule(rule_name)
+      Chef::Log.debug("Rule hash original: #{rule_hash}")
+      rule_hash['remote_ips'] = standardize_cidrs(remote_ips)
+      modify_parsed_rule(rule_hash)
+      update_extant_rule?(rule_hash, firewall_name, true)
     end
 
     def rule_group_is_whitelisted?(firewall_name, rule)
