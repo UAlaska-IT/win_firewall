@@ -281,21 +281,26 @@ module Firewall
       return false
     end
 
-    def diff_rule_ips(existing_rule, key, val)
-      found_one = false
-      val.split(',').each do |ip|
-        found_one = true unless existing_rule[key].include?(ip)
+    # Diffs to CIDR strings
+    def diff_ips(ips1, ips2)
+      retval = []
+      ips1.split(',').each do |ip|
+        retval.push(ip) unless ips2.include?(ip)
       end
-      existing_rule[key].split(',').each do |ip|
-        found_one = true unless val.include?(ip)
+      ips2.split(',').each do |ip|
+        retval.push(ip) unless ips1.include?(ip)
       end
-      diff.push(key) if found_one
+    end
+
+    def diff_rule_ips(existing_rule, key, val, diff)
+      ip_diff = diff_ips(val, existing_rule[key])
+      diff.push(key) unless ip_diff.empty?
     end
 
     def diff_rule_field(diff, existing_rule, key, val)
       return if filter_rule_field_diff?(existing_rule, key, val)
       if key.match?(/ips/) # These are joined strings, and possibly reordered
-        diff_rule_ips(existing_rule, key, val)
+        diff_rule_ips(existing_rule, key, val, diff)
       else
         diff.push(key)
       end
