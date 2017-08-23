@@ -204,7 +204,7 @@ module Firewall
         # Filter empty values
       elsif (key == 'local_ports' || key == 'remote_ports') && val == 'any'
         # Any port must be implicit for everything but TCP/UDP, so just filter it
-      elsif ['name', 'description'].include?(key)
+      elsif ['name', 'description', 'program'].include?(key)
         # May have spaces, so quote it
         script_code << ' ' + cmd_map(key) + "='" + val + "'"
       else
