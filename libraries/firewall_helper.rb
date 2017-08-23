@@ -336,9 +336,9 @@ module Firewall
       return true
     end
 
-    def update_extant_rule?(rule_hash, firewall_name)
+    def update_extant_rule?(rule_hash, firewall_name, modify_managed)
       rule_diff = get_rule_diff(rule_hash)
-      return false if rule_diff.empty? || check_and_log_managed_rule?(rule_hash)
+      return false if rule_diff.empty? || (!modify_managed && check_and_log_managed_rule?(rule_hash))
 
       # Rules are immutable: if we attempt to update an existing rule, we end up with two rules with the same name
       converge_by "Update Firewall Rule #{rule_hash['name']}" do
@@ -352,7 +352,7 @@ module Firewall
 
     def verify_or_update_firewall_hash(rule_hash, firewall_name)
       @@managed_rule_list.push(rule_hash['name'].downcase)
-      create_non_extant_rule?(rule_hash, firewall_name) || update_extant_rule?(rule_hash, firewall_name)
+      create_non_extant_rule?(rule_hash, firewall_name) || update_extant_rule?(rule_hash, firewall_name, false)
     end
 
     # Check if an existing rule matches the passed rule
