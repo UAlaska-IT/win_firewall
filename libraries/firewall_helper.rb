@@ -488,6 +488,11 @@ module Firewall
       modify_matching_rules(method(:verify_rule_does_not_exist), rule_state, nil)
     end
 
+    # Replace firewall rule with an otherwise identical rule that limits remote IPs to the specified CIDRs
+    def ensure_remote_ips_match(rule_state)
+      modify_matching_rules(method(:verify_rule_ips_match), rule_state, rule_state.remote_ips)
+    end
+
     def call_function_for_external_rule(func, rule, firewall, disabled_only)
       return unless rule_can_be_managed?(rule, firewall.name, true)
       # Skip disabled rules?
