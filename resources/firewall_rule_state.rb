@@ -14,6 +14,7 @@ provides :firewall_rule_state, os: 'windows'
 property :name, String, name_property: true
 property :use_regex, [true, false], default: false
 property :firewall_name, String, default: 'default' # The name of the associated firewall
+property :remote_ips, Array, default: []
 
 extend ::Firewall::Helper
 
@@ -29,6 +30,10 @@ action :delete do
   delete_helper(@new_resource)
 end
 
+action :set_remote_ips do
+  set_remote_ips_helper(@new_resource)
+end
+
 action_class.class_eval do
   include ::Firewall::Helper
 
@@ -42,5 +47,9 @@ action_class.class_eval do
 
   def delete_helper(new_resource)
     ensure_no_matching_external_rules_exist(new_resource)
+  end
+
+  def set_remote_ips_helper(new_resource)
+    ensure_remote_ips_match(new_resource)
   end
 end
