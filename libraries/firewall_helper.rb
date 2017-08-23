@@ -265,7 +265,7 @@ module Firewall
     end
 
     def hash_to_lines(hash)
-      retval = '{'
+      retval = String.new('{')
       hash.each do |key, val|
         retval << "\r\n  #{key} = #{val}"
       end
