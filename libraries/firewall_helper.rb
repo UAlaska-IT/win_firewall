@@ -258,7 +258,7 @@ module Firewall
     # Determine if an existing rule is manageable
     # Log an error if an attempt is made to modify a built-in rule or a rule set by group policy
     def check_and_log_managed_rule?(new_rule)
-      existing_rule = parse_firewall_rule(rule.name)
+      existing_rule = parse_firewall_rule(new_rule['name'])
       return true if log_system_rule_error?(existing_rule, new_rule)
       return true if log_group_policy_error?(existing_rule, new_rule)
       return false
