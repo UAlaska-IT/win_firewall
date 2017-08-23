@@ -290,6 +290,7 @@ module Firewall
       ips2.split(',').each do |ip|
         retval.push(ip) unless ips1.include?(ip)
       end
+      return retval
     end
 
     def diff_rule_ips(existing_rule, key, val, diff)
@@ -315,9 +316,8 @@ module Firewall
 
     # Determine if an existing rule matches a rule resource
     # Compare each parameter of the new resource with the corresponding rule field
-    def get_rule_diff(rule)
-      new_rule = rule2hash(rule)
-      existing_rule = parse_firewall_rule(rule.name)
+    def get_rule_diff(new_rule_hash)
+      existing_rule = parse_firewall_rule(new_rule_hash['name'])
       diff = []
       new_rule.each do |key, val| # Only compare fields that exist in the firewall_rule resource
         diff_rule_field(diff, existing_rule, key, val)
@@ -337,7 +337,8 @@ module Firewall
     end
 
     def update_extant_rule?(rule)
-      rule_diff = get_rule_diff(rule)
+      rule_hash = rule2hash(rule)
+      rule_diff = get_rule_diff(rule_hash)
       return false if rule_diff.empty? || check_and_log_managed_rule?(rule)
 
       # Rules are immutable: if we attempt to update an existing rule, we end up with two rules with the same name
