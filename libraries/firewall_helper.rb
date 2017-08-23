@@ -350,15 +350,15 @@ module Firewall
       return true
     end
 
-    def verify_or_update_firewall_hash(rule_hash)
+    def verify_or_update_firewall_hash(rule_hash, firewall_name)
       @@managed_rule_list.push(rule_hash['name'].downcase)
-      create_non_extant_rule?(rule_hash, rule.firewall_name) || update_extant_rule?(rule_hash, rule.firewall_name)
+      create_non_extant_rule?(rule_hash, firewall_name) || update_extant_rule?(rule_hash, firewall_name)
     end
 
     # Check if an existing rule matches the passed rule
     # Return true iff the rule is changed (create or replaced as needed)
     def verify_or_update_firewall_rule(rule)
-      verify_or_update_firewall_hash(rule2hash(rule))
+      verify_or_update_firewall_hash(rule2hash(rule), rule.firewall_name)
     end
 
     # Return true iff the rule exists and was enabled (and is now disabled)
