@@ -118,7 +118,7 @@ module Firewall
     # Keys and values will be in lowercase
     def parse_firewall_rules
       script_code = 'netsh advfirewall firewall show rule name=all verbose'
-      cmd = log_powershell_out('parse', script_code)
+      cmd = powershell_out(script_code) # Not logged because it makes too much noise
 
       retval = parse_firewall_paragraphs(cmd)
 
