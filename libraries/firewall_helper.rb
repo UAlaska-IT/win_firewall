@@ -326,19 +326,17 @@ module Firewall
       return diff
     end
 
-    def create_non_extant_rule?(rule)
-      rule_hash = rule2hash(rule)
+    def create_non_extant_rule?(rule_hash, firewall_name)
       return false if firewall_rule_exists?(rule_hash['name'])
 
       Chef::Log.debug("Creating firewall rule '#{rule_hash['name']}'")
       converge_by "Create Firewall Rule #{rule_hash['name']}" do # ~FC005 # Repetition of declarations??
-        create_firewall_rule(rule_hash, rule.firewall_name)
+        create_firewall_rule(rule_hash, firewall_name)
       end
       return true
     end
 
-    def update_extant_rule?(rule)
-      rule_hash = rule2hash(rule)
+    def update_extant_rule?(rule_hash, firewall_name)
       rule_diff = get_rule_diff(rule_hash)
       return false if rule_diff.empty? || check_and_log_managed_rule?(rule_hash)
 
@@ -347,16 +345,20 @@ module Firewall
         Chef::Log.debug("Deleting firewall rule '#{rule_hash['name']}'")
         delete_firewall_rule(rule_hash['name'])
         Chef::Log.debug("Re-creating firewall rule '#{rule_hash['name']}'")
-        create_firewall_rule(rule_hash, rule.firewall_name)
+        create_firewall_rule(rule_hash, firewall_name)
       end
       return true
+    end
+
+    def verify_or_update_firewall_hash(rule_hash)
+      @@managed_rule_list.push(rule_hash['name'].downcase)
+      create_non_extant_rule?(rule_hash, rule.firewall_name) || update_extant_rule?(rule_hash, rule.firewall_name)
     end
 
     # Check if an existing rule matches the passed rule
     # Return true iff the rule is changed (create or replaced as needed)
     def verify_or_update_firewall_rule(rule)
-      @@managed_rule_list.push(rule.name.downcase)
-      create_non_extant_rule?(rule) || update_extant_rule?(rule)
+      verify_or_update_firewall_hash(rule2hash(rule))
     end
 
     # Return true iff the rule exists and was enabled (and is now disabled)
