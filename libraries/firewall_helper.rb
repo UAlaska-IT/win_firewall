@@ -490,7 +490,7 @@ module Firewall
 
     # Replace firewall rule with an otherwise identical rule that limits remote IPs to the specified CIDRs
     def ensure_remote_ips_match(rule_state)
-      modify_matching_rules(method(:verify_rule_ips_match), rule_state, rule_state.remote_ips)
+      modify_matching_rules(method(:verify_rule_ips_match), rule_state, rule_state.ip_list)
     end
 
     def call_function_for_external_rule(func, rule, firewall, disabled_only)
