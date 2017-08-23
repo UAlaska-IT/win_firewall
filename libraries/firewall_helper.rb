@@ -427,11 +427,15 @@ module Firewall
       return true
     end
 
+    def log_and_call_state_function(func, rule, rule_state, data)
+      Chef::Log.info("Rule '#{rule['name']}' modified due to regex /#{rule_state.name}/")
+      func.call(rule['name'], rule_state.firewall_name, data)
+    end
+
     def call_function_for_matching_rule(func, rule, rule_state, data)
       return unless rule_can_be_managed?(rule, rule_state.firewall_name, false)
       if rule['name'].match?(Regexp.new(rule_state.name))
-        Chef::Log.info("Rule '#{rule['name']}' modified due to regex /#{rule_state.name}/")
-        func.call(rule['name'], rule_state.firewall_name, data)
+        log_and_call_state_function(func, rule, rule_state, data)
       else
         Chef::Log.debug("Rule '#{rule['name']}' skipped due to regex /#{rule_state.name}/")
       end
@@ -503,12 +507,16 @@ module Firewall
       modify_external_rules(method(:verify_rule_does_not_exist), firewall, true)
     end
 
+    def log_and_call_group_function(func, rule, rule_group)
+      Chef::Log.info("Rule '#{rule['name']}' modified due to group '#{rule['grouping']}'")
+      func.call(rule['name'], rule_group.firewall_name, nil)
+    end
+
     def call_function_for_group_rule(func, rule, rule_group)
       return unless rule_can_be_managed?(rule, rule_group.firewall_name, false)
       # Group matches
       if rule['grouping'] == rule_group.name.downcase
-        Chef::Log.info("Rule '#{rule['name']}' modified due to group '#{rule['grouping']}'")
-        func.call(rule['name'], rule_group.firewall_name, nil)
+        log_and_call_group_function(func, rule, rule_group)
       # Group does not match
       else
         Chef::Log.debug("Rule '#{rule['name']}' skipped due to group '#{rule['grouping']}'")
