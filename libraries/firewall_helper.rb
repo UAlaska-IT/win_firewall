@@ -362,7 +362,7 @@ module Firewall
     end
 
     # Return true iff the rule exists and was enabled (and is now disabled)
-    def verify_rule_exists_and_is_disabled(rule_name)
+    def verify_rule_exists_and_is_disabled(rule_name, _firewall_name, _data)
       unless firewall_rule_exists?(rule_name)
         raise "Firewall rule '#{rule_name}' does not exist so cannot be disabled"
       end
@@ -375,7 +375,7 @@ module Firewall
     end
 
     # Return true iff the rule exists and was disabled (and is now enabled)
-    def verify_rule_exists_and_is_enabled(rule_name)
+    def verify_rule_exists_and_is_enabled(rule_name, _firewall_name, _data)
       unless firewall_rule_exists?(rule_name)
         raise "Firewall rule '#{rule_name}' does not exist so cannot be enabled"
       end
@@ -388,7 +388,7 @@ module Firewall
     end
 
     # Return true iff the rule existed (and now does not)
-    def verify_rule_does_not_exist(rule_name)
+    def verify_rule_does_not_exist(rule_name, _firewall_name, _data)
       if firewall_rule_exists?(rule_name)
         Chef::Log.debug("Deleting rule '#{rule_name}'")
         converge_by "Delete firewall rule #{rule_name}" do
@@ -427,44 +427,42 @@ module Firewall
       return true
     end
 
-    def call_function_for_matching_rule(func, rule, rule_state)
+    def call_function_for_matching_rule(func, rule, rule_state, data)
       return unless rule_can_be_managed?(rule, rule_state.firewall_name, false)
       if rule['name'].match?(Regexp.new(rule_state.name))
         Chef::Log.info("Rule '#{rule['name']}' modified due to regex /#{rule_state.name}/")
-        func.call(rule['name'])
+        func.call(rule['name'], rule_state.firewall_name, data)
       else
         Chef::Log.debug("Rule '#{rule['name']}' skipped due to regex /#{rule_state.name}/")
       end
     end
 
-    def modify_matching_rules(func, rule_state)
-      firewall_rules = parse_firewall_rules
+    def modify_matching_rules(func, rule_state, data)
       Chef::Log.debug("Resource list: '#{@@managed_rule_list}'")
 
-      return func.call(rule_state.name) unless rule_state.use_regex
+      return func.call(rule_state.name, rule_state.firewall_name, data) unless rule_state.use_regex
 
-      firewall_rules.each do |rule|
-        # Order matters due to short circuit
-        call_function_for_matching_rule(func, rule, rule_state)
+      parse_firewall_rules.each do |rule|
+        call_function_for_matching_rule(func, rule, rule_state, data)
       end
     end
 
     # Disable matching firewall rules that are not whitelisted or managed with Chef
     # Return true iff any non-whitelisted, external rule was enabled (and is now disabled)
     def verify_matching_rules_are_disabled(rule_state)
-      modify_matching_rules(method(:verify_rule_exists_and_is_disabled), rule_state)
+      modify_matching_rules(method(:verify_rule_exists_and_is_disabled), rule_state, nil)
     end
 
     # Enable matching firewall rules that are not whitelisted or managed with Chef
     # Return true iff any non-whitelisted, external rule was disabled (and is now enabled)
     def verify_matching_rules_are_enabled(rule_state)
-      modify_matching_rules(method(:verify_rule_exists_and_is_enabled), rule_state)
+      modify_matching_rules(method(:verify_rule_exists_and_is_enabled), rule_state, nil)
     end
 
     # Delete matching firewall rules that are not whitelisted or managed with Chef
     # Return true iff any non-whitelisted, external rule existed (and now does not)
     def ensure_no_matching_external_rules_exist(rule_state)
-      modify_matching_rules(method(:verify_rule_does_not_exist), rule_state)
+      modify_matching_rules(method(:verify_rule_does_not_exist), rule_state, nil)
     end
 
     def call_function_for_external_rule(func, rule, firewall, disabled_only)
@@ -474,7 +472,7 @@ module Firewall
         Chef::Log.debug("Rule '#{rule['name']}' whitelisted because it was enabled")
       else
         Chef::Log.info("Rule '#{rule['name']}' modified due to firewall action (not whitelisted)")
-        func.call(rule['name'])
+        func.call(rule['name'], firewall.name, nil)
       end
     end
 
@@ -510,7 +508,7 @@ module Firewall
       # Group matches
       if rule['grouping'] == rule_group.name.downcase
         Chef::Log.info("Rule '#{rule['name']}' modified due to group '#{rule['grouping']}'")
-        func.call(rule['name'])
+        func.call(rule['name'], rule_group.firewall_name, nil)
       # Group does not match
       else
         Chef::Log.debug("Rule '#{rule['name']}' skipped due to group '#{rule['grouping']}'")
