@@ -319,10 +319,10 @@ module Firewall
     def get_rule_diff(new_rule_hash)
       existing_rule = parse_firewall_rule(new_rule_hash['name'])
       diff = []
-      new_rule.each do |key, val| # Only compare fields that exist in the firewall_rule resource
+      new_rule_hash.each do |key, val| # Only compare fields that exist in the firewall_rule resource
         diff_rule_field(diff, existing_rule, key, val)
       end
-      log_rule_diff(existing_rule, new_rule, diff)
+      log_rule_diff(existing_rule, new_rule_hash, diff)
       return diff
     end
 
