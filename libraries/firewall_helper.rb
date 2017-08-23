@@ -415,6 +415,7 @@ module Firewall
       Chef::Log.debug("Rule hash original: #{rule_hash}")
       rule_hash['remote_ips'] = standardize_cidrs(remote_ips)
       modify_parsed_rule(rule_hash)
+      @@managed_rule_list.push(rule_hash['name'].downcase)
       update_extant_rule?(rule_hash, firewall_name, true)
     end
 
