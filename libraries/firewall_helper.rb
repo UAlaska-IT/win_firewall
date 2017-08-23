@@ -219,13 +219,13 @@ module Firewall
     end
 
     # Add a new firewall rule
-    def create_firewall_rule(rule)
+    def create_firewall_rule(rule_hash, firewall_name)
       script_code = String.new('netsh advfirewall firewall add rule')
-      rule2hash(rule).each do |key, val|
+      rule_hash.each do |key, val|
         filter_or_append_rule_field(script_code, key, val)
       end
-      @@creation_script_cache[rule.firewall_name] = [] if @@creation_script_cache[rule.firewall_name].nil?
-      @@creation_script_cache[rule.firewall_name].push(script_code)
+      @@creation_script_cache[firewall_name] = [] if @@creation_script_cache[firewall_name].nil?
+      @@creation_script_cache[firewall_name].push(script_code)
       cmd = log_powershell_out('creation', script_code)
       validate_creation_output(cmd.stdout)
     end
@@ -327,11 +327,12 @@ module Firewall
     end
 
     def create_non_extant_rule?(rule)
-      return false if firewall_rule_exists?(rule.name)
+      rule_hash = rule2hash(rule)
+      return false if firewall_rule_exists?(rule_hash['name'])
 
-      Chef::Log.debug("Creating firewall rule '#{rule.name}'")
-      converge_by "Create Firewall Rule #{rule.name}" do # ~FC005 # Repetition of declarations??
-        create_firewall_rule(rule)
+      Chef::Log.debug("Creating firewall rule '#{rule_hash['name']}'")
+      converge_by "Create Firewall Rule #{rule_hash['name']}" do # ~FC005 # Repetition of declarations??
+        create_firewall_rule(rule_hash, rule.firewall_name)
       end
       return true
     end
@@ -342,11 +343,11 @@ module Firewall
       return false if rule_diff.empty? || check_and_log_managed_rule?(rule_hash)
 
       # Rules are immutable: if we attempt to update an existing rule, we end up with two rules with the same name
-      converge_by "Update Firewall Rule #{rule.name}" do
-        Chef::Log.debug("Deleting firewall rule '#{rule.name}'")
-        delete_firewall_rule(rule.name)
-        Chef::Log.debug("Re-creating firewall rule '#{rule.name}'")
-        create_firewall_rule(rule)
+      converge_by "Update Firewall Rule #{rule_hash['name']}" do
+        Chef::Log.debug("Deleting firewall rule '#{rule_hash['name']}'")
+        delete_firewall_rule(rule_hash['name'])
+        Chef::Log.debug("Re-creating firewall rule '#{rule_hash['name']}'")
+        create_firewall_rule(rule_hash, rule.firewall_name)
       end
       return true
     end
