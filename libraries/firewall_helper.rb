@@ -195,7 +195,8 @@ module Firewall
         'remote_ips' => 'remoteip',
         'local_ports' => 'localport',
         'remote_ports' => 'remoteport',
-        'interface_type' => 'interfacetype'
+        'interface_type' => 'interfacetype',
+        'edge traversal' => 'edge' # This comes from parsed-modified rules
       }[key] || key
     end
 
