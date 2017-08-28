@@ -35,10 +35,10 @@ This cookbook provides four resources for managing the firewall in Windows.  See
 
 
 ### firewall
-A firewall provides actions to manage the entire firewall, as when managing all rules with a single action.  A firewall also internally manages script caches and all resources multiplexed to the firewall, such as whitelists.  No default action is provided so that all actions must be explicitly specified.  See the `firewall_rule_whitelist` resource for details on modifying internal state.
+A firewall provides actions to manage the entire firewall, as when managing all rules with a single action.  A firewall also internally manages script caches and all resources multiplexed to the firewall, such as whitelists.  No default action is provided so that all actions must be explicitly specified.  See the whitelist attributes below for details on modifying internal state.
 
 __Actions__
-Five actions are provided.  These actions are associated with only the resources that were previously multiplexed with the named firewall.  For example, deleting existing rules will only respect whitelists that were assigned to the current firewall.  See the `firewall_rule_whitelist` resource.
+Five actions are provided.  These actions are associated with only attributes that were previously multiplexed to the named firewall.  For example, deleting existing rules will only respect whitelists that were assigned to the current firewall.     All `disable` and `delete` actions will skip managed rules and respect both the rule whitelist, `node['win_firewall']['firewall_to_whitelist_groups']`,  and the group whitelist, `node['win_firewall']['firewall_to_whitelist_rules']`, of the associated firewall.
 
 * `create` - Post condition is that the named firewall exists and all resources are initialized.  A firewall must be created before any associated firewall_rule or firewall_rule_state is created.
 * `log_scripts` - Post condition is that all cached scripts are written to the log_file.
@@ -102,7 +102,7 @@ There are two modes for how the rule name is used
 1. The name is used to find an exact match to the name of a single existing rule
 2. The name is a regex that will be used to match names of existing rules
 
-When regex matching is used, all actions will skip managed rules and respect the rule whitelist of the associated firewall, but not the group whitelist.
+When regex matching is used, all actions will skip managed rules and respect the rule whitelist, `node['win_firewall']['firewall_to_whitelist_groups']`, of the associated firewall but not the group whitelist, `node['win_firewall']['firewall_to_whitelist_rules']`.
 
 __Actions__
 Three actions are provided.  If exact name matching is used, all actions except `delete` enforce the precondition that the named rule exists and will throw an exception otherwise.
@@ -124,11 +124,11 @@ This resource has three attributes.
 This resource manages an entire rule group with a single action.  See the `firewall_rule_whitelist` resource for details on creating whitelists to mask group actions.
 
 __Actions__
-Three actions are provided.
+Three actions are provided.  Both `disable` and `delete` actions will skip managed rules and respect the rule whitelist, `node['win_firewall']['firewall_to_whitelist_groups']`, of the associated firewall but not the group whitelist, `node['win_firewall']['firewall_to_whitelist_rules']`.
 
-* `enable` - Post condition is that every rule matching the named group is enabled.  Enforces the precondition that the named rule exists and will throw an exception otherwise.
-* `disable` - Post condition is that every rule matching the named group is disabled.  Respects the rule whitelist of the associated firewall, but not the group whitelist.
-* `delete` - Post condition is that no rule matching the named group exists.  Respects the rule whitelist of the associated firewall, but not the group whitelist.
+* `enable` - Post condition is that every rule matching the named group is enabled.
+* `disable` - Post condition is that every rule matching the named group is disabled.
+* `delete` - Post condition is that no rule matching the named group exists.
 
 __Attributes__
 This resource has a two attributes.
@@ -139,8 +139,8 @@ This resource has a two attributes.
 ## Attributes
 All `firewall` actions and those `firewall_rule_state` actions that use regular expression matching will respect one or more whitelists.
 
-* `node['win_firewall']['firewall_to_whitelist_groups']` - Defaults to `{'default' => ['core networking']}`; the default firewall will whitelist the 'Core Networking' group.  Pre-existing rules that belong to these groups will not be disabled or deleted by actions on the named firewall.
-* `node['win_firewall']['firewall_to_whitelist_rules']` - Defaults to `{'default' => []}`; the default firewall has no whitelisted rules.  Pre-existing rules with name listed here will not be disabled or deleted by actions on the named firewall.
+* `node['win_firewall']['firewall_to_whitelist_groups']` - Defaults to `{'default' => ['core networking']}`; the default firewall will whitelist the 'Core Networking' group.  A hash of firewall name to array of whitelisted rule groups.  Pre-existing rules that belong to these groups will not be disabled or deleted by actions on the named firewall.
+* `node['win_firewall']['firewall_to_whitelist_rules']` - Defaults to `{'default' => []}`; the default firewall has no whitelisted rules.  A hash of firewall name to array of whitelisted rules.  Pre-existing rules with name listed here will not be disabled or deleted by actions on the named firewall.
 
 ## Recipes
 
