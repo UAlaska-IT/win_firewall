@@ -1,4 +1,4 @@
-# Changelog for Windows Baseline Cookbook
+# Changelog for Windows Time Cookbook
 
 ## 1.1.0
 

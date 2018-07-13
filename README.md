@@ -27,8 +27,10 @@ Platforms validated via Test Kitchen:
 
 Notes:
 
-* Windows 2008 requires WMF update for Chef and DotNet update for Sensu
-* Custom resources typically use raw PowerShell 5.0 scripts for converge and idempotence
+* This is a low-level cookbook with precondition that Powershell 5.0 is installed
+  * Custom resources will not work with previous versions of Powershell
+  * Windows 2008 and 2012 require WMF update to install Powershell 5.0
+  * Powershell is not installed by this cookbook
 
 ## Resources
 

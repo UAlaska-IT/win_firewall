@@ -11,7 +11,7 @@ source_url 'https://github.alaska.edu/oit-cookbooks/win_firewall' if respond_to?
 
 version '1.1.0'
 
-# Windows 2008 requires DotNet and WMF updates
+# Windows 2008 requires WMF updates
 supports 'windows', '>= 6.1' # Windows Server 2008R2 or 7, see https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions
 
 chef_version '>= 13.0.0' if respond_to?(:chef_version)
