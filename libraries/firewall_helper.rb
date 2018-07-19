@@ -221,7 +221,7 @@ module Firewall
 
     # Add a new firewall rule
     def create_firewall_rule(rule_hash, firewall_name)
-      script_code = String.new('netsh advfirewall firewall add rule')
+      script_code = +'netsh advfirewall firewall add rule'
       rule_hash.each do |key, val|
         filter_or_append_rule_field(script_code, key, val)
       end
@@ -266,11 +266,11 @@ module Firewall
     end
 
     def hash_to_lines(hash)
-      retval = String.new('{')
+      retval = +'{'
       hash.each do |key, val|
         retval << "\r\n  #{key} = #{val}"
       end
-      retval << "\r\n}"
+      retval << '\r\n}'
     end
 
     def filter_rule_field_diff?(existing_rule, key, val) # rubocop:disable Metrics/CyclomaticComplexity
