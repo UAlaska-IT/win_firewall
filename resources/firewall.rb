@@ -10,8 +10,7 @@
 resource_name :firewall
 provides :firewall, os: 'windows'
 
-# The name property, used to identify the firewall
-property :name, String, name_property: true
+# The name property is used to identify the firewall
 property :log_file, String, default: 'C:/chef/log/win_firewall.log'
 
 extend ::Firewall::Helper

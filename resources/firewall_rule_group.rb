@@ -6,7 +6,6 @@
 resource_name :firewall_rule_group
 provides :firewall_rule_group, os: 'windows'
 
-property :name, String, name_property: true
 property :firewall_name, String, default: 'default' # The name of the associated firewall
 
 extend ::Firewall::Helper

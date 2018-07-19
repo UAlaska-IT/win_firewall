@@ -10,8 +10,6 @@ provides :firewall_rule, os: 'windows'
 
 default_action :create_synchronize
 
-# Name is required for every rule
-property :name, String, name_property: true
 property :firewall_name, String, default: 'default' # The name of the associated firewall, used for logging
 
 # These properties are required, but have default values
