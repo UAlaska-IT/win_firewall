@@ -364,9 +364,7 @@ module Firewall
 
     # Return true iff the rule exists and was enabled (and is now disabled)
     def verify_rule_exists_and_is_disabled(rule_name, _firewall_name, _data)
-      unless firewall_rule_exists?(rule_name)
-        raise "Firewall rule '#{rule_name}' does not exist so cannot be disabled"
-      end
+      raise "Firewall rule '#{rule_name}' does not exist so cannot be disabled" unless firewall_rule_exists?(rule_name)
       rule = parse_firewall_rule(rule_name)
       return if rule['enabled'] == 'no'
       converge_by "Disable firewall rule #{rule_name}" do
@@ -377,9 +375,7 @@ module Firewall
 
     # Return true iff the rule exists and was disabled (and is now enabled)
     def verify_rule_exists_and_is_enabled(rule_name, _firewall_name, _data)
-      unless firewall_rule_exists?(rule_name)
-        raise "Firewall rule '#{rule_name}' does not exist so cannot be enabled"
-      end
+      raise "Firewall rule '#{rule_name}' does not exist so cannot be enabled" unless firewall_rule_exists?(rule_name)
       rule = parse_firewall_rule(rule_name)
       return if rule['enabled'] == 'yes'
       converge_by "Enable firewall rule #{rule_name}" do
