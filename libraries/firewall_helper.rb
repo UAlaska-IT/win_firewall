@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include Chef::Mixin::PowershellOut
-
 # Four name spaces come into play
 # 1) The 'internal' space uses attribute names for hash keys, and all CIDRs are normalized
 # All other spaces are thin interfaces that are converted to the 'internal' working namespace
@@ -9,7 +7,9 @@ include Chef::Mixin::PowershellOut
 # 3) The 'query' space interfaces with netsh output formatting
 # 4) The 'command' space interfaces with netsh input formatting
 
+# This module implements helpers that are used for Firewall resources
 module Firewall
+  include Chef::Mixin::PowershellOut
   # This module implements helpers that are used for Firewall resources
   module Helper
     @@managed_rule_list = []
@@ -570,3 +570,6 @@ module Firewall
     end
   end
 end
+
+Chef::Recipe.include(Firewall::Helper)
+Chef::Resource.include(Firewall::Helper)

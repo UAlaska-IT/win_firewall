@@ -13,8 +13,6 @@ provides :firewall, os: 'windows'
 # The name property is used to identify the firewall
 property :log_file, String, default: 'C:/chef/log/win_firewall.log'
 
-extend ::Firewall::Helper
-
 action :create do
   create_helper(@new_resource)
 end

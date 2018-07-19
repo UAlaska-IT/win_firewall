@@ -32,8 +32,6 @@ property :enabled, String, default: 'yes', equal_to: ['yes', 'no']
 property :description, String, default: ''
 property :program, String, default: ''
 
-extend ::Firewall::Helper
-
 action :create_synchronize do
   create_synchronize_helper(@new_resource)
 end

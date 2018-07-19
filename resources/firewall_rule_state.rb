@@ -15,8 +15,6 @@ property :use_regex, [true, false], default: false
 property :firewall_name, String, default: 'default' # The name of the associated firewall
 property :ip_list, Array, default: []
 
-extend ::Firewall::Helper
-
 action :disable do
   disable_helper(@new_resource)
 end
