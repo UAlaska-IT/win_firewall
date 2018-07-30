@@ -11,6 +11,22 @@ end
   end
 end
 
+# Simple creation
+firewall_rule 'Inbound Windows Remote Management (WinRM) over HTTP or HTTPS' do
+  description 'Allow inbound Windows Remote Management (WinRM) over HTTP or HTTPS from only UA address space'
+  direction 'in'
+  remote_ips ['all']
+  local_ports [5985, 5986]
+  protocol 'tcp'
+  program 'System'
+  firewall_action 'allow'
+end
+
+# Clear defaults to make testing clear
+firewall 'default' do
+  action :delete_external_rules
+end
+
 firewall 'default' do
   action :log_scripts
 end

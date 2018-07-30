@@ -6,6 +6,17 @@ describe powershell('netsh advfirewall firewall show rule name=all verbose') do
   end
 end
 
+# WinRM over HTTP
+describe port(5985) do
+  it { should be_listening }
+  its('protocols') { should include 'tcp' }
+end
+
+# WinRM over HTTPS
+describe port(5986) do
+  it { should be_listening }
+  its('protocols') { should include 'tcp' }
+end
 
 describe file('C:/chef/log/win_firewall.log') do
   it { should exist }
