@@ -10,6 +10,8 @@
 # This module implements helpers that are used for Firewall resources
 module Firewall
   include Chef::Mixin::PowershellOut
+  require 'fileutils'
+
   # This module implements helpers that are used for Firewall resources
   module Helper
     @@managed_rule_list = []
@@ -29,6 +31,8 @@ module Firewall
 
     def create_log_file(firewall, creation_script)
       # Debug usage; not logically a resource
+      dirname = File.dirname(@@firewall_log_files[firewall.name])
+      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
       File.write(@@firewall_log_files[firewall.name], creation_script)
     end
 

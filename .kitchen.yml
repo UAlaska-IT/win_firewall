@@ -60,7 +60,7 @@ platforms:
 suites:
   - name: default
     run_list:
-      - recipe[win_firewall::default]
+      - recipe[firewall_test::default]
     verifier:
       inspec_tests:
         - test/smoke/default
