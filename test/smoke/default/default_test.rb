@@ -12,12 +12,6 @@ describe port(5985) do
   its('protocols') { should include 'tcp' }
 end
 
-# WinRM over HTTPS
-describe port(5986) do
-  it { should be_listening }
-  its('protocols') { should include 'tcp' }
-end
-
 describe file('C:/chef/log/win_firewall.log') do
   it { should exist }
   it { should be_file }
