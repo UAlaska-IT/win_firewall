@@ -22,6 +22,13 @@ firewall_rule 'Inbound Windows Remote Management (WinRM) over HTTP or HTTPS' do
   firewall_action 'allow'
 end
 
+# ToDo
+# Add-remove
+# Duplicate
+# Bad IP
+# IPV6 source
+# Range IP
+
 # Clear defaults to make testing clear
 firewall 'default' do
   action :delete_external_rules
