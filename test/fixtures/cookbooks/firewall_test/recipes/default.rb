@@ -11,11 +11,11 @@ end
   end
 end
 
-# Simple creation
+# Simple creation; dont delete this one!
 firewall_rule 'Inbound Windows Remote Management (WinRM) over HTTP or HTTPS' do
   description 'Allow inbound Windows Remote Management (WinRM) over HTTP or HTTPS from only UA address space'
   direction 'in'
-  remote_ips ['all']
+  remote_ips ['any']
   local_ports [5985, 5986]
   protocol 'tcp'
   program 'System'
