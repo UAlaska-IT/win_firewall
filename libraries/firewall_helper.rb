@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-include Chef::Mixin::PowershellOut
-
 # Four name spaces come into play
 # 1) The 'internal' space uses attribute names for hash keys, and all CIDRs are normalized
 # All other spaces are thin interfaces that are converted to the 'internal' working namespace
@@ -9,7 +7,11 @@ include Chef::Mixin::PowershellOut
 # 3) The 'query' space interfaces with netsh output formatting
 # 4) The 'command' space interfaces with netsh input formatting
 
+# This module implements helpers that are used for Firewall resources
 module Firewall
+  include Chef::Mixin::PowershellOut
+  require 'fileutils'
+
   # This module implements helpers that are used for Firewall resources
   module Helper
     @@managed_rule_list = []
@@ -29,6 +31,8 @@ module Firewall
 
     def create_log_file(firewall, creation_script)
       # Debug usage; not logically a resource
+      dirname = File.dirname(@@firewall_log_files[firewall.name])
+      FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
       File.write(@@firewall_log_files[firewall.name], creation_script)
     end
 
@@ -221,7 +225,7 @@ module Firewall
 
     # Add a new firewall rule
     def create_firewall_rule(rule_hash, firewall_name)
-      script_code = String.new('netsh advfirewall firewall add rule')
+      script_code = +'netsh advfirewall firewall add rule'
       rule_hash.each do |key, val|
         filter_or_append_rule_field(script_code, key, val)
       end
@@ -266,11 +270,11 @@ module Firewall
     end
 
     def hash_to_lines(hash)
-      retval = String.new('{')
+      retval = +'{'
       hash.each do |key, val|
         retval << "\r\n  #{key} = #{val}"
       end
-      retval << "\r\n}"
+      retval << '\r\n}'
     end
 
     def filter_rule_field_diff?(existing_rule, key, val) # rubocop:disable Metrics/CyclomaticComplexity
@@ -331,7 +335,8 @@ module Firewall
       return false if firewall_rule_exists?(rule_hash['name'])
 
       Chef::Log.debug("Creating firewall rule '#{rule_hash['name']}'")
-      converge_by "Create Firewall Rule #{rule_hash['name']}" do # ~FC005 # Repetition of declarations??
+      # Repetition of declarations??
+      converge_by "Create Firewall Rule #{rule_hash['name']}" do # ~FC005
         create_firewall_rule(rule_hash, firewall_name)
       end
       return true
@@ -364,9 +369,7 @@ module Firewall
 
     # Return true iff the rule exists and was enabled (and is now disabled)
     def verify_rule_exists_and_is_disabled(rule_name, _firewall_name, _data)
-      unless firewall_rule_exists?(rule_name)
-        raise "Firewall rule '#{rule_name}' does not exist so cannot be disabled"
-      end
+      raise "Firewall rule '#{rule_name}' does not exist so cannot be disabled" unless firewall_rule_exists?(rule_name)
       rule = parse_firewall_rule(rule_name)
       return if rule['enabled'] == 'no'
       converge_by "Disable firewall rule #{rule_name}" do
@@ -377,9 +380,7 @@ module Firewall
 
     # Return true iff the rule exists and was disabled (and is now enabled)
     def verify_rule_exists_and_is_enabled(rule_name, _firewall_name, _data)
-      unless firewall_rule_exists?(rule_name)
-        raise "Firewall rule '#{rule_name}' does not exist so cannot be enabled"
-      end
+      raise "Firewall rule '#{rule_name}' does not exist so cannot be enabled" unless firewall_rule_exists?(rule_name)
       rule = parse_firewall_rule(rule_name)
       return if rule['enabled'] == 'yes'
       converge_by "Enable firewall rule #{rule_name}" do
@@ -570,3 +571,6 @@ module Firewall
     end
   end
 end
+
+Chef::Recipe.include(Firewall::Helper)
+Chef::Resource.include(Firewall::Helper)
